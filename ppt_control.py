@@ -1,32 +1,59 @@
-import json
 import redis
+import threading
+import queue
+
+class Worker(threading.Thread):
+    def __init__(self, queue):
+        threading.Thread.__init__(self)
+        self.queue = queue
+        print("ppt_control init ok")
+
+    def run(self):
+        msg = self.queue.get()
+        while(msg != 'end'):
+            #print("msg: %s" % msg)
+            msg = str(self.queue.get())
+            if msg == 'right':
+                print("run Command: right")
+            elif msg == 'left':
+                print("run Command: left")
+            else:
+                print("run Command: others")
+        print("ppt_control finished")
+        self.join()
 
 def connect_to_redis():
     redis_ip = 'x.x.x.x'
     r = redis.StrictRedis(host=redis_ip,password="2u04sl3", port=8987,db=0)
-    print("start")
-    while r.ping()==False:
+    while r.ping() == False:
         print("connecting to redis server...");
     print("connected to redis server!!")
     return r
 
 
-def subscribe(r):
+def subscribe(r, ppt_control, data_queue):
     sub = r.pubsub()
     sub.subscribe('PPT_COMMAND')
-
+    get_data = ""
     try:
         for i in sub.listen():
-            if i.get('data') == b'right':
-                print("Receives Command: right")
-            elif i.get('data') == b'left':
-                print("Receives Command: left")
+            temp_data = i.get('data')
+            # print("Receives Command org: %s" % temp_data)
+            # first data will receive number 1, which means subscribe successfully
+            if temp_data != 1:
+                get_data = temp_data.decode('utf-8')
+                data_queue.put(get_data)
+                print("Receives Command decode: %s" % get_data)
     except:
+        get_data = "end"
+        ppt_control.join()
         print("something causes error")
 
 if __name__ == '__main__':
-    print("start")
     r = connect_to_redis()
-    subscribe(r)
-
+    data_queue = queue.Queue()
+    ppt_control = Worker(data_queue)
+    ppt_control.start()
+    subscribe(r, ppt_control, data_queue)
+    
 
