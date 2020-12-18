@@ -9,7 +9,7 @@ class Worker(threading.Thread):
         print("ppt_control init ok")
 
     def run(self):
-        msg = self.queue.get()
+        msg = ""
         while(msg != 'end'):
             #print("msg: %s" % msg)
             msg = str(self.queue.get())
@@ -36,12 +36,11 @@ def subscribe(r, ppt_control, data_queue):
     sub.subscribe('PPT_COMMAND')
     get_data = ""
     try:
-        for i in sub.listen():
-            temp_data = i.get('data')
-            # print("Receives Command org: %s" % temp_data)
-            # first data will receive number 1, which means subscribe successfully
-            if temp_data != 1:
-                get_data = temp_data.decode('utf-8')
+        for mes in sub.listen():
+            responses = mes.get('data')
+            # below if can aviod first data = 1(it means subscribe sucessfully) into inside of if
+            if isinstance(responses, bytes):
+                get_data = responses.decode('utf-8')
                 data_queue.put(get_data)
                 print("Receives Command decode: %s" % get_data)
     except:
