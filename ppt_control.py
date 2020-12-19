@@ -2,7 +2,7 @@ import redis
 import threading
 import queue
 import keyboard
-
+import ujson
 '''
 reference:
 https://github.com/boppreh/keyboard
@@ -35,9 +35,21 @@ class Worker(threading.Thread):
         print("ppt_control finished")
         self.join()
 
+def get_connect_info():
+    file_path = "./ip_pwd.json"
+    # open file
+    f = open(file_path, 'r')
+    content = ujson.loads(f.read())
+    f.close()
+    redis_ip = content["ip"]
+    pwd = content["pwd"]
+    #print("ip: %s" % redis_ip)
+    #print("pwd: %s" % pwd)
+    return redis_ip, pwd
+
 def connect_to_redis():
-    redis_ip = 'x.x.x.x'
-    r = redis.StrictRedis(host=redis_ip,password="2u04sl3", port=8987,db=0)
+    redis_ip, pwd = get_connect_info()
+    r = redis.StrictRedis(host=redis_ip,password=pwd, port=8987,db=0)
     while r.ping() == False:
         print("connecting to redis server...")
     print("connected to redis server!!")
