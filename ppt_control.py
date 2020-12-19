@@ -1,7 +1,12 @@
 import redis
 import threading
 import queue
+import keyboard
 
+'''
+reference:
+https://github.com/boppreh/keyboard
+'''
 class Worker(threading.Thread):
     def __init__(self, queue):
         threading.Thread.__init__(self)
@@ -15,8 +20,16 @@ class Worker(threading.Thread):
             msg = str(self.queue.get())
             if msg == 'right':
                 print("run Command: right")
+                keyboard.press_and_release('n')
             elif msg == 'left':
                 print("run Command: left")
+                keyboard.press_and_release('p')
+            elif msg == 'up': 
+                print("run Command: up(home page)")   
+                keyboard.press_and_release('Home')
+            elif msg == 'down': 
+                print("run Command: up(end page)")   
+                keyboard.press_and_release('End')  
             else:
                 print("run Command: others")
         print("ppt_control finished")
@@ -26,7 +39,7 @@ def connect_to_redis():
     redis_ip = 'x.x.x.x'
     r = redis.StrictRedis(host=redis_ip,password="2u04sl3", port=8987,db=0)
     while r.ping() == False:
-        print("connecting to redis server...");
+        print("connecting to redis server...")
     print("connected to redis server!!")
     return r
 
