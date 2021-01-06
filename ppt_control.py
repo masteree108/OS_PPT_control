@@ -24,12 +24,18 @@ class Worker(threading.Thread):
             elif msg == 'left':
                 print("run Command: left")
                 keyboard.press_and_release('p')
-            elif msg == 'up': 
-                print("run Command: up(home page)")   
+            elif msg == 'house': 
+                print("run Command: house(home page)")   
                 keyboard.press_and_release('Home')
             elif msg == 'down': 
-                print("run Command: up(end page)")   
-                keyboard.press_and_release('End')  
+                print("run Command: down(end page)")   
+                keyboard.press_and_release('End') 
+            elif msg == 'go': 
+                print("run Command: go(full screen)")   
+                keyboard.press_and_release('f5')  
+            elif msg == 'off':
+                print("run Command: off(ESC)")
+                keyboard.press_and_release('Esc')  
             else:
                 print("run Command: others")
         print("ppt_control finished")
